@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { AppBar as Bar, Toolbar, Typography, Button } from "@material-ui/core";
 import { SessionContext } from "../contexts/SessionContext/context";
 import { Link } from "react-router-dom";
+import LoggedAppBarItem from "./LoggedAppBarItem";
 
 export default class AppBar extends Component {
   render() {
@@ -23,7 +24,7 @@ export default class AppBar extends Component {
                 return (
                   <>
                     {!!user ? (
-                      <Button color="inherit">{user.displayName}</Button>
+                      <LoggedAppBarItem user={user} />
                     ) : (
                       <Button color="inherit">Login</Button>
                     )}

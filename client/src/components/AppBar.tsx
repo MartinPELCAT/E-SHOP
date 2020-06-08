@@ -3,6 +3,7 @@ import { AppBar as Bar, Toolbar, Typography, Button } from "@material-ui/core";
 import { SessionContext } from "../contexts/SessionContext/context";
 import { Link } from "react-router-dom";
 import LoggedAppBarItem from "./LoggedAppBarItem";
+import Basket from "./Basket";
 
 export default class AppBar extends Component {
   render() {
@@ -11,7 +12,7 @@ export default class AppBar extends Component {
         <Bar
           position="static"
           elevation={0}
-          style={{ backgroundColor: "#131a21" }}
+          style={{ backgroundColor: "#fff", color: "#333" }}
         >
           <Toolbar>
             <Typography variant="h6" className="fg-1">
@@ -19,6 +20,7 @@ export default class AppBar extends Component {
                 E-Shop
               </Link>
             </Typography>
+            <Basket />
             <SessionContext.Consumer>
               {({ user }) => {
                 return (

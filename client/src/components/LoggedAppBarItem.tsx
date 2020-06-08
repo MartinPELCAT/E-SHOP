@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { Button, Menu, MenuItem } from "@material-ui/core";
 import { User } from "../models/User";
+import { Link } from "react-router-dom";
+import { SessionContext } from "../contexts/SessionContext/context";
 
 interface Props {
   user: User;
@@ -39,8 +41,27 @@ export default class LoggedAppBarItem extends Component<Props, States> {
           open={!!this.state.anchorMenu}
           onClose={this.handleClose}
         >
-          <MenuItem onClick={this.handleClose}>Profile</MenuItem>
+          <MenuItem onClick={this.handleClose} component={Link} to={"/sell"}>
+            Seller
+          </MenuItem>
+          <MenuItem onClick={this.handleClose} component={Link} to={"/profile"}>
+            Profile
+          </MenuItem>
           <MenuItem onClick={this.handleClose}>My account</MenuItem>
+          <SessionContext.Consumer>
+            {({ logout }) => (
+              <>
+                <MenuItem
+                  onClick={() => {
+                    logout();
+                    return this.handleClose;
+                  }}
+                >
+                  Log out
+                </MenuItem>
+              </>
+            )}
+          </SessionContext.Consumer>
         </Menu>
       </>
     );

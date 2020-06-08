@@ -2,6 +2,9 @@
   padding: 0;
   margin: 0; }
 
+body {
+  background-color: #f2f2f2; }
+
 .link-inherit {
   text-decoration: none;
   color: inherit; }

@@ -4,7 +4,6 @@ import ApplicationContext from "./contexts/ApplicationContext";
 import "./app.scss";
 import Login from "./pages/Login";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
-import DefaultLayout from "./layouts/DefaultLayout";
 import Default from "./pages/Default";
 
 export default class App extends Component {
@@ -17,7 +16,6 @@ export default class App extends Component {
             <Route exact path={"/login"} component={Login} />
             <Route exact path={"/"} component={Default} />
             {/* Protected Routes */}
-
             <Route component={ProtectedRoutes} />
           </Switch>
         </Router>

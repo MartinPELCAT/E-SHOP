@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import DefaultLayout from "../layouts/DefaultLayout";
 import { Grid } from "@material-ui/core";
+import Test from "../components/Test";
 
 export default class Default extends Component {
   render() {
@@ -8,7 +9,7 @@ export default class Default extends Component {
       <DefaultLayout>
         <Grid container>
           <Grid item md={2}>
-            left
+            <Test />
           </Grid>
           <Grid item md={10}>
             right

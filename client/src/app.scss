@@ -13,3 +13,8 @@ body {
 .fg-1 {
   flex-grow: 1;
 }
+
+input[type="number"] {
+  text-align: center;
+  padding-left: 10px;
+}

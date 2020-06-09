@@ -1,16 +1,8 @@
 import React, { Component, Fragment } from "react";
-import {
-  IconButton,
-  Badge,
-  Card,
-  CardContent,
-  Popover,
-  Grid,
-  Typography,
-  Divider,
-} from "@material-ui/core";
-import { ShoppingCart, Close } from "@material-ui/icons";
+import { IconButton, Badge, Popover, Divider } from "@material-ui/core";
+import { ShoppingCart } from "@material-ui/icons";
 import { BasketContext } from "../contexts/BasketContext/BasketContext";
+import BasketItem from "./BasketItem";
 
 interface State {
   anchorEl: null | Element;
@@ -31,11 +23,13 @@ export default class Basket extends Component<{}, State> {
   render() {
     return (
       <BasketContext.Consumer>
-        {({ items }) => (
+        {({ items, removeItem }) => (
           <>
             <IconButton
               aria-label="cart"
-              onClick={(e) => this.setState({ anchorEl: e.currentTarget })}
+              onClick={(e) =>
+                this.setState({ anchorEl: Object.seal(e.currentTarget) })
+              }
             >
               <Badge badgeContent={items?.length} max={10} color="secondary">
                 <ShoppingCart />
@@ -43,10 +37,11 @@ export default class Basket extends Component<{}, State> {
             </IconButton>
             {!!items?.length && (
               <Popover
-                id="basket-menu"
                 open={!!this.state.anchorEl}
                 keepMounted
-                style={{ maxHeight: 350 }}
+                style={{
+                  maxHeight: "75vh",
+                }}
                 anchorEl={this.state.anchorEl}
                 onClose={this.handleCloseMenu}
                 anchorOrigin={{
@@ -60,58 +55,11 @@ export default class Basket extends Component<{}, State> {
               >
                 {items.map(({ item, quantity }, index) => (
                   <Fragment key={item.id}>
-                    <Card
-                      style={{
-                        width: 400,
-                        borderRadius: 0,
-                        border: "none",
-                      }}
-                      elevation={0}
-                    >
-                      <CardContent style={{ paddingBottom: 16 }}>
-                        <Grid container>
-                          <Grid item md={10}>
-                            <Typography>{item.title}</Typography>
-                          </Grid>
-                          <Grid
-                            item
-                            container
-                            md={2}
-                            direction="row"
-                            justify="flex-end"
-                            alignItems="flex-start"
-                          >
-                            <Close
-                              fontSize="small"
-                              style={{
-                                position: "relative",
-                                top: -10,
-                                right: -10,
-                              }}
-                            />
-                          </Grid>
-                        </Grid>
-                        <Grid container>
-                          <Grid item md={8}>
-                            something there
-                          </Grid>
-                          <Grid
-                            item
-                            md={4}
-                            container
-                            direction="row"
-                            justify="flex-end"
-                          >
-                            <Typography
-                              variant={"subtitle2"}
-                              color={"textSecondary"}
-                            >
-                              {item.unitPrice}
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                      </CardContent>
-                    </Card>
+                    <BasketItem
+                      item={item}
+                      onItemRemoved={() => removeItem && removeItem(item)}
+                      quantity={quantity}
+                    />
                     {index !== items.length - 1 && <Divider />}
                   </Fragment>
                 ))}

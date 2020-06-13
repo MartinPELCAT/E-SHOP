@@ -1,3 +1,3 @@
 import AuthenticationController from "./AuthenticationController";
-
-export { AuthenticationController };
+import TestController from "./TestController";
+export { AuthenticationController, TestController };

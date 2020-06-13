@@ -4,6 +4,7 @@ import IControllerBase from "interfaces/IControllerBase.interface";
 import * as chalk from "chalk";
 import * as path from "path";
 import { connectDatabase } from "./config/database";
+import { router } from "../src/decorators/ApiFramework";
 
 export default class App {
   private app: Application;
@@ -14,9 +15,9 @@ export default class App {
     this.port = appInit.port;
     this.middlewares(appInit.middleWares);
     this.routes(appInit.controllers);
-    this.app.use(
-      express.static(path.join(__dirname, "/../../", "client", "build"))
-    );
+    // this.app.use(
+    //   express.static(path.join(__dirname, "/../../", "client", "build"))
+    // );
   }
 
   private middlewares(middleWares: {
@@ -28,11 +29,12 @@ export default class App {
   }
 
   private routes(controllers: {
-    forEach: (arg0: (controller: IControllerBase) => void) => void;
+    forEach: (arg0: (controller: any) => void) => void;
   }) {
-    controllers.forEach((controller) => {
-      this.app.use("/api" + controller.controllerPath, controller.router);
-    });
+    this.app.use("/api", router);
+    // controllers.forEach((controller) => {
+    //   this.app.use("/api" + controller.controllerPath, controller.router);
+    // });
   }
 
   public listen() {

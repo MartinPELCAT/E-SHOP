@@ -6,6 +6,8 @@ import * as compression from "compression";
 import * as helmet from "helmet";
 import * as CookieParser from "cookie-parser";
 
+require("../src/controllers/TestController");
+
 const app = new App({
   port: 1604,
   controllers: [new AuthenticationController()],

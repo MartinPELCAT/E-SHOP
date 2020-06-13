@@ -1,5 +1,9 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Links
+
+[https://netbasal.com/create-and-test-decorators-in-javascript-85e8d5cf879c] Javascript decorateurs
+
 ## Available Scripts
 
 In the project directory, you can run:

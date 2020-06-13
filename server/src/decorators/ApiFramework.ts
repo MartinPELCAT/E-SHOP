@@ -3,6 +3,7 @@ import { Router } from "express";
 interface EndPointDescriptor {
   url: string;
   functionName: string;
+  middlewares?: Array<Function>;
 }
 
 export const router = Router();
@@ -18,40 +19,39 @@ export const Controller = (baseUrl: string): Function => {
   }) {
     constructor.prototype.getEndPoints &&
       constructor.prototype.getEndPoints.forEach((endPoint) => {
-        router.get(
-          `${baseUrl}${endPoint.url}`,
-          constructor.prototype[`${endPoint.functionName}`]
-        );
+        router.get(`${baseUrl}${endPoint.url}`, [
+          ...(endPoint.middlewares || []),
+          constructor.prototype[`${endPoint.functionName}`],
+        ]);
       });
 
     constructor.prototype.postEndPoints &&
       constructor.prototype.postEndPoints.forEach((endPoint) => {
-        router.post(
-          `${baseUrl}${endPoint.url}`,
-          constructor.prototype[`${endPoint.functionName}`]
-        );
+        router.post(`${baseUrl}${endPoint.url}`, [
+          ...(endPoint.middlewares || []),
+          constructor.prototype[`${endPoint.functionName}`],
+        ]);
       });
 
     constructor.prototype.putEndPoints &&
       constructor.prototype.putEndPoints.forEach((endPoint) => {
-        router.put(
-          `${baseUrl}${endPoint.url}`,
-          constructor.prototype[`${endPoint.functionName}`]
-        );
+        router.put(`${baseUrl}${endPoint.url}`, [
+          ...(endPoint.middlewares || []),
+          constructor.prototype[`${endPoint.functionName}`],
+        ]);
       });
 
     constructor.prototype.deleteEndPoints &&
       constructor.prototype.deleteEndPoints.forEach((endPoint) => {
-        router.delete(
-          `${baseUrl}${endPoint.url}`,
-          constructor.prototype[`${endPoint.functionName}`]
-        );
+        router.delete(`${baseUrl}${endPoint.url}`, [
+          ...(endPoint.middlewares || []),
+          constructor.prototype[`${endPoint.functionName}`],
+        ]);
       });
-    console.log(constructor.prototype);
   };
 };
 
-export const Get = (url: string): Function => {
+export const Get = (url: string, middlewares?: Array<Function>): Function => {
   return function (
     target: { getEndPoints: Array<EndPointDescriptor> | undefined },
     propertyKey: string
@@ -59,15 +59,15 @@ export const Get = (url: string): Function => {
     if (!!target.getEndPoints) {
       target.getEndPoints = [
         ...target.getEndPoints,
-        { url, functionName: propertyKey },
+        { url, functionName: propertyKey, middlewares },
       ];
     } else {
-      target.getEndPoints = [{ url, functionName: propertyKey }];
+      target.getEndPoints = [{ url, functionName: propertyKey, middlewares }];
     }
   };
 };
 
-export const Post = (url: string): Function => {
+export const Post = (url: string, middlewares?: Array<Function>): Function => {
   return function (
     target: { postEndPoints: Array<EndPointDescriptor> | undefined },
     propertyKey: string
@@ -75,15 +75,15 @@ export const Post = (url: string): Function => {
     if (!!target.postEndPoints) {
       target.postEndPoints = [
         ...target.postEndPoints,
-        { url, functionName: propertyKey },
+        { url, functionName: propertyKey, middlewares },
       ];
     } else {
-      target.postEndPoints = [{ url, functionName: propertyKey }];
+      target.postEndPoints = [{ url, functionName: propertyKey, middlewares }];
     }
   };
 };
 
-export const Put = (url: string): Function => {
+export const Put = (url: string, middlewares?: Array<Function>): Function => {
   return function (
     target: { putEndPoints: Array<EndPointDescriptor> | undefined },
     propertyKey: string
@@ -91,15 +91,18 @@ export const Put = (url: string): Function => {
     if (!!target.putEndPoints) {
       target.putEndPoints = [
         ...target.putEndPoints,
-        { url, functionName: propertyKey },
+        { url, functionName: propertyKey, middlewares },
       ];
     } else {
-      target.putEndPoints = [{ url, functionName: propertyKey }];
+      target.putEndPoints = [{ url, functionName: propertyKey, middlewares }];
     }
   };
 };
 
-export const Delete = (url: string): Function => {
+export const Delete = (
+  url: string,
+  middlewares?: Array<Function>
+): Function => {
   return function (
     target: { deleteEndPoints: Array<EndPointDescriptor> | undefined },
     propertyKey: string
@@ -107,10 +110,12 @@ export const Delete = (url: string): Function => {
     if (!!target.deleteEndPoints) {
       target.deleteEndPoints = [
         ...target.deleteEndPoints,
-        { url, functionName: propertyKey },
+        { url, functionName: propertyKey, middlewares },
       ];
     } else {
-      target.deleteEndPoints = [{ url, functionName: propertyKey }];
+      target.deleteEndPoints = [
+        { url, functionName: propertyKey, middlewares },
+      ];
     }
   };
 };

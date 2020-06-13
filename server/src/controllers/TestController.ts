@@ -2,9 +2,6 @@ import { Controller, Get, Delete, Post, Put } from "../decorators/ApiFramework";
 import { NextFunction, Response, Request } from "express";
 @Controller("/test")
 export default class TestController {
-  constructor() {
-    console.log("TestController constructor");
-  }
   @Get("/get")
   public endpoint(_req: Request, res: Response, next: NextFunction): Response {
     console.log("TC-Endoint");

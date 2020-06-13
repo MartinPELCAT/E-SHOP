@@ -1,20 +1,20 @@
 import * as express from "express";
 import { Application } from "express";
-import IControllerBase from "interfaces/IControllerBase.interface";
 import * as chalk from "chalk";
 import * as path from "path";
 import { connectDatabase } from "./config/database";
 import { router } from "../src/decorators/ApiFramework";
+import * as fs from "fs";
 
 export default class App {
   private app: Application;
   private port: number;
 
-  constructor(appInit: { port: number; middleWares: any; controllers: any }) {
+  constructor(appInit: { port: number; middleWares: any }) {
     this.app = express();
     this.port = appInit.port;
     this.middlewares(appInit.middleWares);
-    this.routes(appInit.controllers);
+    this.loadControllers();
     // this.app.use(
     //   express.static(path.join(__dirname, "/../../", "client", "build"))
     // );
@@ -28,13 +28,12 @@ export default class App {
     });
   }
 
-  private routes(controllers: {
-    forEach: (arg0: (controller: any) => void) => void;
-  }) {
-    this.app.use("/api", router);
-    // controllers.forEach((controller) => {
-    //   this.app.use("/api" + controller.controllerPath, controller.router);
-    // });
+  private loadControllers() {
+    let controllerPath = path.join(__dirname, "controllers");
+    fs.readdirSync(controllerPath).forEach(function (file) {
+      require("./controllers/" + file);
+    });
+    this.app.use("/api", router)
   }
 
   public listen() {

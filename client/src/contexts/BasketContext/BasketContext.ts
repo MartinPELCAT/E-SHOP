@@ -1,8 +1,8 @@
 import { createContext } from "react";
-import { Item } from "../../models/Item";
+import { Item, BasketItem } from "../../models/Item";
 
 interface IBasketContext {
-  items?: Array<{ item: Item; quantity: number }>;
+  items?: Array<BasketItem>;
   addItem?(item: Item, quantity: number): void;
   removeItem?(item: Item): void;
 }

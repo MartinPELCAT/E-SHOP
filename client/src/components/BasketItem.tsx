@@ -14,7 +14,9 @@ import { Close, Add, Remove } from "@material-ui/icons";
 interface Props {
   item: Item;
   quantity: number;
-  onItemRemoved?(): void;
+  onItemRemoved?(item: Item): void;
+  onItemClosing?(): void;
+  onQuantityChange?(item: Item, quantity: number): void;
 }
 
 interface State {
@@ -32,25 +34,34 @@ export default class BasketItem extends Component<Props, State> {
     this.handleQuantityInputChange = this.handleQuantityInputChange.bind(this);
     this.handleRemoveItem = this.handleRemoveItem.bind(this);
     this.handleItemCollaped = this.handleItemCollaped.bind(this);
+    this.changeQuantity = this.changeQuantity.bind(this);
   }
 
   handleIncreaseQuantity() {
     //TODO: Api call
-    this.setState({ quantity: this.state.quantity + 1 });
+    this.changeQuantity(this.state.quantity + 1);
   }
 
   handleDecreaseQuantity() {
     //TODO: Api call
-    this.setState({ quantity: this.state.quantity - 1 });
+    this.changeQuantity(this.state.quantity - 1);
   }
 
   handleQuantityInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     //TODO: Api call
     if (!!event.target.value) {
-      this.setState({ quantity: parseInt(event.target.value) });
+      this.changeQuantity(parseInt(event.target.value));
     } else {
-      this.setState({ quantity: 1 });
+      this.changeQuantity(1);
     }
+  }
+
+  changeQuantity(quantity: number) {
+    this.setState({ quantity }, () => {
+      console.log("change Quantity");
+      this.props.onQuantityChange &&
+        this.props.onQuantityChange(this.props.item, quantity);
+    });
   }
 
   handleRemoveItem() {
@@ -58,12 +69,16 @@ export default class BasketItem extends Component<Props, State> {
   }
 
   handleItemCollaped() {
-    this.props.onItemRemoved && this.props.onItemRemoved();
+    this.props.onItemRemoved && this.props.onItemRemoved(this.props.item);
   }
 
   render() {
     return (
-      <Collapse in={this.state.quantity > 0} onExited={this.handleItemCollaped}>
+      <Collapse
+        in={this.state.quantity > 0}
+        onExited={this.handleItemCollaped}
+        onExit={this.props.onItemClosing}
+      >
         <Card
           style={{
             width: 400,
@@ -113,7 +128,7 @@ export default class BasketItem extends Component<Props, State> {
               </Grid>
               <Grid item md={4} container direction="row" justify="flex-end">
                 <Typography variant={"subtitle2"} color={"textSecondary"}>
-                  {this.props.item.unitPrice}
+                  {`${this.props.item.unitPrice * this.state.quantity} €`}
                 </Typography>
               </Grid>
             </Grid>

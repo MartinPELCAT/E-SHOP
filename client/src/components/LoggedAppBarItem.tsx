@@ -3,6 +3,7 @@ import { Button, Menu, MenuItem } from "@material-ui/core";
 import { User } from "../models/User";
 import { Link } from "react-router-dom";
 import { SessionContext } from "../contexts/SessionContext/context";
+import { i18n } from "../utils/translationUtils";
 
 interface Props {
   user: User;
@@ -42,12 +43,12 @@ export default class LoggedAppBarItem extends Component<Props, States> {
           onClose={this.handleClose}
         >
           <MenuItem onClick={this.handleClose} component={Link} to={"/sell"}>
-            Seller
+            {i18n("seller")}
           </MenuItem>
           <MenuItem onClick={this.handleClose} component={Link} to={"/profile"}>
             Profile
           </MenuItem>
-          <MenuItem onClick={this.handleClose}>My account</MenuItem>
+          <MenuItem onClick={this.handleClose}>{i18n("my-account")}</MenuItem>
           <SessionContext.Consumer>
             {({ logout }) => (
               <>
@@ -57,7 +58,7 @@ export default class LoggedAppBarItem extends Component<Props, States> {
                     return this.handleClose;
                   }}
                 >
-                  Log out
+                  {i18n("logout")}
                 </MenuItem>
               </>
             )}

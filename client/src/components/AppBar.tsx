@@ -4,6 +4,7 @@ import { SessionContext } from "../contexts/SessionContext/context";
 import { Link } from "react-router-dom";
 import LoggedAppBarItem from "./LoggedAppBarItem";
 import Basket from "./Basket";
+import { i18n } from "../utils/translationUtils";
 
 export default class AppBar extends Component {
   render() {
@@ -28,7 +29,7 @@ export default class AppBar extends Component {
                     {!!user ? (
                       <LoggedAppBarItem user={user} />
                     ) : (
-                      <Button color="inherit">Login</Button>
+                      <Button color="inherit">{i18n("login")}</Button>
                     )}
                   </>
                 );

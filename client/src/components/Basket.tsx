@@ -3,6 +3,7 @@ import { IconButton, Badge, Popover, Divider } from "@material-ui/core";
 import { ShoppingCart } from "@material-ui/icons";
 import { BasketContext } from "../contexts/BasketContext/BasketContext";
 import BasketItem from "./BasketItem";
+import BasketFooterPrice from "./BasketFooterPrice";
 
 interface State {
   anchorEl: null | Element;
@@ -23,7 +24,7 @@ export default class Basket extends Component<{}, State> {
   render() {
     return (
       <BasketContext.Consumer>
-        {({ items, removeItem }) => (
+        {({ items, removeItem, addItem }) => (
           <>
             <IconButton
               aria-label="cart"
@@ -37,11 +38,9 @@ export default class Basket extends Component<{}, State> {
             </IconButton>
             {!!items?.length && (
               <Popover
+                className="basket"
                 open={!!this.state.anchorEl}
                 keepMounted
-                style={{
-                  maxHeight: "75vh",
-                }}
                 anchorEl={this.state.anchorEl}
                 onClose={this.handleCloseMenu}
                 anchorOrigin={{
@@ -53,16 +52,24 @@ export default class Basket extends Component<{}, State> {
                   horizontal: "center",
                 }}
               >
-                {items.map(({ item, quantity }, index) => (
-                  <Fragment key={item.id}>
-                    <BasketItem
-                      item={item}
-                      onItemRemoved={() => removeItem && removeItem(item)}
-                      quantity={quantity}
-                    />
-                    {index !== items.length - 1 && <Divider />}
-                  </Fragment>
-                ))}
+                <div className="basket-items">
+                  {items.map(({ item, quantity }) => (
+                    <Fragment key={item.id}>
+                      <BasketItem
+                        item={item}
+                        onItemRemoved={removeItem}
+                        onQuantityChange={addItem}
+                        onItemClosing={() =>
+                          items.length === 1 &&
+                          this.setState({ anchorEl: null })
+                        }
+                        quantity={quantity}
+                      />
+                      <Divider />
+                    </Fragment>
+                  ))}
+                </div>
+                <BasketFooterPrice />
               </Popover>
             )}
           </>

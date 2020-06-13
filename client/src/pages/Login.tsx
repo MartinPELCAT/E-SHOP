@@ -1,13 +1,14 @@
 import React, { Component } from "react";
 import { Helmet } from "react-helmet";
+import { i18n } from "../utils/translationUtils";
 export default class Login extends Component {
   render() {
     return (
       <div>
         <Helmet>
-          <title>Login Page</title>
+          <title>{i18n("login", { qwert: "Test" })}</title>
         </Helmet>
-        login
+        {i18n("login", { qwert: "Test" })}
       </div>
     );
   }

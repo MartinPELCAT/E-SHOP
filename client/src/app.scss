@@ -18,3 +18,21 @@ input[type="number"] {
   text-align: center;
   padding-left: 10px;
 }
+.basket {
+  .MuiInput-underline:before {
+    content: none !important;
+  }
+
+  .MuiInput-underline:after {
+    content: none !important;
+  }
+}
+
+.basket-items {
+  max-height: 274px;
+  overflow: hidden;
+  overflow-y: scroll;
+}
+.basket-items-footer {
+  height: 70px;
+}

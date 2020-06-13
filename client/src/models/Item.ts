@@ -3,3 +3,8 @@ export interface Item {
   title: string;
   unitPrice: number;
 }
+
+export interface BasketItem {
+  item: Item;
+  quantity: number;
+}

@@ -3,7 +3,7 @@ import { Application } from "express";
 import { italic } from "chalk";
 import { join } from "path";
 import { connectDatabase } from "./config/database";
-import { router } from "../src/decorators/ApiFramework";
+import { router } from "./decorators/RouteDecorator";
 import { readdirSync } from "fs";
 
 export default class App {

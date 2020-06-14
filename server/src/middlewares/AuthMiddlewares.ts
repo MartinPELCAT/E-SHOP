@@ -1,25 +1,22 @@
-import { ExtractJwt } from 'passport-jwt';
-import { User } from '../models';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
+import UserServiceImpl from "../services/impl/UserServiceImpl";
 
-
-export const AuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    // let token = req.signedCookies._UID;
-    // if (!token) {
-    //     res.status(403).json({ message: "You are not logged" })
-    // } else {
-    //     const options: FindOptions = {
-    //         where: {
-    //             token: token
-    //         }
-    //     };
-
-    //     User.findOne<User>(options).then(function (user: User) {
-    //         if (!user) { return res.status(200).json({ message: "This token is not linked to any user" }) }
-    //         req.user = user;
-    //         return next();
-    //     }).catch(function (err: Error) {
-    //         return res.status(500).json({ message: "Internal error please try again" });
-    //     });
-    // }
-}
+export const AuthMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  let token = req.signedCookies._UID;
+  if (!token) {
+    return res.status(403).json({ message: "You are not logged" });
+  } else {
+    UserServiceImpl.findOneOrFail({ token })
+      .then((user) => {
+        req.body.currentUser = user;
+        return next();
+      })
+      .catch(() => {
+        return res.status(403).json({ message: "You are not logged" });
+      });
+  }
+};

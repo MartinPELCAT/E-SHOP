@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { IUser } from "../models/User";
 import { isValidBody, setSessionCookie, clearSessionCookie } from "../utils";
-import { Controller, Post, Get, Autowired } from "../decorators/ApiFramework";
+import { Controller, Post, Get, Autowired } from "../decorators/RouteDecorator";
 import { AuthenticationService } from "services/AuthenticationService";
 import { UserService } from "services/UserService";
 
@@ -32,6 +32,7 @@ export default class AuthenticationController {
     let { email, password, lastname, firstname, username }: IUser = req.body;
     let userParameters = { email, password, lastname, firstname, username };
     if (!isValidBody(req.body, userParameters)) {
+      // TODO: use yup or hapi joi instead
       return res.status(400).json({ message: "Unkonwn parameters" });
     }
     this.userService

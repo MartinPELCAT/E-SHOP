@@ -8,6 +8,39 @@ interface EndPointDescriptor {
 
 export const router = Router();
 
+const getRouteUrl = (baseUrl: string, endPointUrl: string): string => {
+  return `${baseUrl}${endPointUrl}`;
+};
+
+const getRouteMiddlewares = (
+  constructor: any,
+  endPoint: EndPointDescriptor
+): Array<any> => {
+  return [
+    ...(endPoint.middlewares || []),
+    constructor.prototype[`${endPoint.functionName}`].bind(
+      constructor.prototype
+    ),
+  ];
+};
+
+const addEnpointToController = (
+  target: any,
+  key: string,
+  url: string,
+  propertyKey: string,
+  middlewares?: Array<Function>
+): void => {
+  if (!!target[key]) {
+    target[key] = [
+      ...target[key],
+      { url, functionName: propertyKey, middlewares },
+    ];
+  } else {
+    target[key] = [{ url, functionName: propertyKey, middlewares }];
+  }
+};
+
 export const Controller = (baseUrl: string): Function => {
   return function (constructor: {
     prototype: {
@@ -18,36 +51,40 @@ export const Controller = (baseUrl: string): Function => {
       [key: string]: any;
     };
   }) {
+    constructor.prototype.services &&
+      constructor.prototype.services.forEach((service: any) => {
+        constructor.prototype[service.key] = service.module.default;
+      });
     constructor.prototype.getEndPoints &&
       constructor.prototype.getEndPoints.forEach((endPoint) => {
-        router.get(`${baseUrl}${endPoint.url}`, [
-          ...(endPoint.middlewares || []),
-          constructor.prototype[`${endPoint.functionName}`],
-        ]);
+        router.get(
+          getRouteUrl(baseUrl, endPoint.url),
+          getRouteMiddlewares(constructor, endPoint)
+        );
       });
 
     constructor.prototype.postEndPoints &&
       constructor.prototype.postEndPoints.forEach((endPoint) => {
-        router.post(`${baseUrl}${endPoint.url}`, [
-          ...(endPoint.middlewares || []),
-          constructor.prototype[`${endPoint.functionName}`],
-        ]);
+        router.post(
+          getRouteUrl(baseUrl, endPoint.url),
+          getRouteMiddlewares(constructor, endPoint)
+        );
       });
 
     constructor.prototype.putEndPoints &&
       constructor.prototype.putEndPoints.forEach((endPoint) => {
-        router.put(`${baseUrl}${endPoint.url}`, [
-          ...(endPoint.middlewares || []),
-          constructor.prototype[`${endPoint.functionName}`],
-        ]);
+        router.put(
+          getRouteUrl(baseUrl, endPoint.url),
+          getRouteMiddlewares(constructor, endPoint)
+        );
       });
 
     constructor.prototype.deleteEndPoints &&
       constructor.prototype.deleteEndPoints.forEach((endPoint) => {
-        router.delete(`${baseUrl}${endPoint.url}`, [
-          ...(endPoint.middlewares || []),
-          constructor.prototype[`${endPoint.functionName}`],
-        ]);
+        router.delete(
+          getRouteUrl(baseUrl, endPoint.url),
+          getRouteMiddlewares(constructor, endPoint)
+        );
       });
   };
 };
@@ -57,14 +94,13 @@ export const Get = (url: string, middlewares?: Array<Function>): Function => {
     target: { getEndPoints: Array<EndPointDescriptor> | undefined },
     propertyKey: string
   ) {
-    if (!!target.getEndPoints) {
-      target.getEndPoints = [
-        ...target.getEndPoints,
-        { url, functionName: propertyKey, middlewares },
-      ];
-    } else {
-      target.getEndPoints = [{ url, functionName: propertyKey, middlewares }];
-    }
+    addEnpointToController(
+      target,
+      "getEndPoints",
+      url,
+      propertyKey,
+      middlewares
+    );
   };
 };
 
@@ -73,14 +109,13 @@ export const Post = (url: string, middlewares?: Array<Function>): Function => {
     target: { postEndPoints: Array<EndPointDescriptor> | undefined },
     propertyKey: string
   ) {
-    if (!!target.postEndPoints) {
-      target.postEndPoints = [
-        ...target.postEndPoints,
-        { url, functionName: propertyKey, middlewares },
-      ];
-    } else {
-      target.postEndPoints = [{ url, functionName: propertyKey, middlewares }];
-    }
+    addEnpointToController(
+      target,
+      "postEndPoints",
+      url,
+      propertyKey,
+      middlewares
+    );
   };
 };
 
@@ -89,14 +124,13 @@ export const Put = (url: string, middlewares?: Array<Function>): Function => {
     target: { putEndPoints: Array<EndPointDescriptor> | undefined },
     propertyKey: string
   ) {
-    if (!!target.putEndPoints) {
-      target.putEndPoints = [
-        ...target.putEndPoints,
-        { url, functionName: propertyKey, middlewares },
-      ];
-    } else {
-      target.putEndPoints = [{ url, functionName: propertyKey, middlewares }];
-    }
+    addEnpointToController(
+      target,
+      "putEndPoints",
+      url,
+      propertyKey,
+      middlewares
+    );
   };
 };
 
@@ -108,15 +142,21 @@ export const Delete = (
     target: { deleteEndPoints: Array<EndPointDescriptor> | undefined },
     propertyKey: string
   ) {
-    if (!!target.deleteEndPoints) {
-      target.deleteEndPoints = [
-        ...target.deleteEndPoints,
-        { url, functionName: propertyKey, middlewares },
-      ];
-    } else {
-      target.deleteEndPoints = [
-        { url, functionName: propertyKey, middlewares },
-      ];
-    }
+    addEnpointToController(
+      target,
+      "deleteEndPoints",
+      url,
+      propertyKey,
+      middlewares
+    );
   };
+};
+
+export const Autowired = (target: any, key: string) => {
+  let module = require(`../services/impl/${key}Impl`);
+  if (!!target.services) {
+    target.services = [...target.services, { key, module }];
+  } else {
+    target.services = [{ key, module }];
+  }
 };

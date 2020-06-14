@@ -1,5 +1,5 @@
 import { Response, Request, NextFunction, CookieOptions } from "express";
-import { IUser } from "../models";
+import { IUser } from "../models/User";
 import { addYears } from "date-fns";
 
 export const clearSessionCookie = (
@@ -7,8 +7,6 @@ export const clearSessionCookie = (
   res: Response,
   next: NextFunction
 ): void => {
-  console.log("clearing cookies");
-
   let token = req.signedCookies._UID;
   if (token) {
     res.clearCookie("_UID");

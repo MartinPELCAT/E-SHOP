@@ -1,20 +1,24 @@
 import { Request, Response } from "express";
-import { IUser } from "../models";
-import { AuthenticationService, UserService } from "../services";
+import { IUser } from "../models/User";
 import { isValidBody, setSessionCookie, clearSessionCookie } from "../utils";
-import { Controller, Post, Get } from "../decorators/ApiFramework";
+import { Controller, Post, Get, Autowired } from "../decorators/ApiFramework";
+import { AuthenticationService } from "services/AuthenticationService";
+import { UserService } from "services/UserService";
 
 @Controller("/auth")
 export default class AuthenticationController {
-  private authenticationService = AuthenticationService;
-  private userService = UserService;
+  @Autowired
+  private authenticationService!: AuthenticationService;
+
+  @Autowired
+  private userService!: UserService;
 
   @Post("/login", [clearSessionCookie])
   public login(req: Request, res: Response) {
     let { email, password, rememberMe } = req.body;
     this.authenticationService
-      .findUserOrFail({ email: email }, password)
-      .then((user) => {
+      .findUserOrFail({ email }, password)
+      .then((user: IUser) => {
         setSessionCookie(res, user, rememberMe);
         return res.send({ user, message: "You are now logged", sucess: true });
       })
@@ -32,10 +36,10 @@ export default class AuthenticationController {
     }
     this.userService
       .createUser({ password, firstname, lastname, email, username })
-      .then((createdUser) => {
+      .then((createdUser: any) => {
         this.authenticationService
           .generateNewToken(createdUser)
-          .then((user) => {
+          .then((user: any) => {
             return res.status(201).json(user);
           })
           .catch(() => {
@@ -56,7 +60,7 @@ export default class AuthenticationController {
 
     this.userService
       .findOneOrFail({ token: token })
-      .then((user) => {
+      .then((user: any) => {
         return res.send({ isConnected: true, user });
       })
       .catch(() => {

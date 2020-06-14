@@ -5,7 +5,7 @@ export interface IUser extends Document {
   firstname: string;
   lastname: string;
   email: string;
-  password: string;
+  password: string | undefined;
   photoPath?: string;
   token?: string;
 }

@@ -15,6 +15,7 @@ export const Controller = (baseUrl: string): Function => {
       postEndPoints: Array<EndPointDescriptor> | undefined;
       putEndPoints: Array<EndPointDescriptor> | undefined;
       deleteEndPoints: Array<EndPointDescriptor> | undefined;
+      [key: string]: any;
     };
   }) {
     constructor.prototype.getEndPoints &&

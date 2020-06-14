@@ -2,6 +2,7 @@
   "compilerOptions": {
     "resolveJsonModule": true,
     "sourceMap": true,
+    "strict": true,
     "target": "es6",
     "module": "commonjs",
     "outDir": "./dist",

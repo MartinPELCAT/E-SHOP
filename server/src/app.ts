@@ -1,10 +1,10 @@
 import * as express from "express";
 import { Application } from "express";
-import * as chalk from "chalk";
-import * as path from "path";
+import { italic } from "chalk";
+import { join } from "path";
 import { connectDatabase } from "./config/database";
 import { router } from "../src/decorators/ApiFramework";
-import * as fs from "fs";
+import { readdirSync } from "fs";
 
 export default class App {
   private app: Application;
@@ -29,11 +29,11 @@ export default class App {
   }
 
   private loadControllers() {
-    let controllerPath = path.join(__dirname, "controllers");
-    fs.readdirSync(controllerPath).forEach(function (file) {
+    let controllerPath = join(__dirname, "controllers");
+    readdirSync(controllerPath).forEach(function (file) {
       require("./controllers/" + file);
     });
-    this.app.use("/api", router)
+    this.app.use("/api", router);
   }
 
   public listen() {
@@ -42,9 +42,7 @@ export default class App {
     // });
     this.app.listen(this.port, () => {
       console.log("---------------------------------------------");
-      console.log(
-        chalk.italic(`App listening on the http://localhost:${this.port}`)
-      );
+      console.log(italic(`App listening on the http://localhost:${this.port}`));
       connectDatabase();
     });
   }

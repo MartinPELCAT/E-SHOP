@@ -56,8 +56,19 @@
     "@types/passport-http-bearer": "^1.0.34",
     "@types/passport-jwt": "^3.0.3",
     "babel-loader": "^8.0.6",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.10",
+    "prettier": "2.0.5",
     "sequelize-cli": "^5.5.1",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,css,md}": "prettier --write"
   }
 }

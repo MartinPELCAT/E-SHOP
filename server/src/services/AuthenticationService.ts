@@ -5,11 +5,6 @@ import { comparePassword } from "../utils";
 
 class AuthenticationService {
   private userDAO = UserDAO;
-  public getCurrentUser(): Promise<IUser | null> {
-    return new Promise((resolve, reject) => {
-      //TODO return current user if connected
-    });
-  }
 
   public generateNewToken(user: IUser): Promise<IUser> {
     return this.userDAO.generateNewToken(user);

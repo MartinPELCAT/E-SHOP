@@ -1,7 +1,7 @@
 import { hash, compare } from "bcrypt";
 import { Promise } from "bluebird";
 
-export const hashPassword = (password): Promise<string> => {
+export const hashPassword = (password: string): Promise<string> => {
   return hash(password, 4);
 };
 

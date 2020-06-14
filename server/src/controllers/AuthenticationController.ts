@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { IUser } from "../models";
 import { AuthenticationService, UserService } from "../services";
 import { isValidBody, setSessionCookie, clearSessionCookie } from "../utils";
@@ -10,7 +10,7 @@ export default class AuthenticationController {
   private userService = UserService;
 
   @Post("/login", [clearSessionCookie])
-  public login(req: Request, res: Response, next: NextFunction) {
+  public login(req: Request, res: Response) {
     let { email, password, rememberMe } = req.body;
     this.authenticationService
       .findUserOrFail({ email: email }, password)
@@ -65,9 +65,7 @@ export default class AuthenticationController {
   }
 
   @Post("/logout", [clearSessionCookie])
-  public logout(req: Request, res: Response) {
-    console.log("Log out");
-
+  public logout(_req: Request, res: Response) {
     return res.send({ sucess: true, message: "You are now logged out" });
   }
 }

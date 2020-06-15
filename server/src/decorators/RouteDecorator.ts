@@ -1,12 +1,23 @@
 import { Router } from "express";
 
 type Methodes = "get" | "post" | "put" | "delete";
+
+type Service = { key: string; module: NodeRequire };
+
+type Routes = { [key: string]: EndPointDescriptor };
+
 interface EndPointDescriptor {
-  target: any;
+  target: ControllerDescriptor;
   url: string;
   methode: Methodes;
   functionName: string;
   middlewares?: Array<Function>;
+}
+
+interface ControllerDescriptor {
+  routes: Routes;
+  services: Array<Service>;
+  [key: string]: any;
 }
 
 export const router = Router();
@@ -34,6 +45,9 @@ const generateRoute = (
     case "put":
       router.put(fullUrl, allMiddlewares);
       break;
+    default:
+      router.all(fullUrl, allMiddlewares);
+      break;
   }
 };
 
@@ -51,6 +65,7 @@ const addEnpointToController = ({
         ...target.routes,
         [`${functionName}`]: {
           url,
+          target,
           methode,
           functionName,
           middlewares: [
@@ -65,6 +80,7 @@ const addEnpointToController = ({
         [`${functionName}`]: {
           url,
           methode,
+          target,
           functionName,
           middlewares,
         },
@@ -72,13 +88,13 @@ const addEnpointToController = ({
     }
   } else {
     target.routes = {
-      [`${functionName}`]: { url, functionName, middlewares, methode },
+      [`${functionName}`]: { url, functionName, middlewares, methode, target },
     };
   }
 };
 
 export const Controller = (baseUrl: string): Function => {
-  return function (constructor: any) {
+  return function (constructor: { prototype: ControllerDescriptor }) {
     constructor.prototype.services &&
       constructor.prototype.services.forEach((service: any) => {
         constructor.prototype[service.key] = service.module.default;
@@ -94,10 +110,7 @@ export const Controller = (baseUrl: string): Function => {
 };
 
 export const Get = (url: string, middlewares?: Array<Function>): Function => {
-  return function (
-    target: { getEndPoints: Array<EndPointDescriptor> | undefined },
-    functionName: string
-  ) {
+  return function (target: ControllerDescriptor, functionName: string) {
     addEnpointToController({
       functionName,
       methode: "get",
@@ -109,10 +122,7 @@ export const Get = (url: string, middlewares?: Array<Function>): Function => {
 };
 
 export const Post = (url: string, middlewares?: Array<Function>): Function => {
-  return function (
-    target: { routes: Array<EndPointDescriptor> | undefined },
-    functionName: string
-  ) {
+  return function (target: ControllerDescriptor, functionName: string) {
     addEnpointToController({
       functionName,
       methode: "post",
@@ -124,10 +134,7 @@ export const Post = (url: string, middlewares?: Array<Function>): Function => {
 };
 
 export const Put = (url: string, middlewares?: Array<Function>): Function => {
-  return function (
-    target: { putEndPoints: Array<EndPointDescriptor> | undefined },
-    functionName: string
-  ) {
+  return function (target: ControllerDescriptor, functionName: string) {
     addEnpointToController({
       functionName,
       methode: "put",
@@ -142,10 +149,7 @@ export const Delete = (
   url: string,
   middlewares?: Array<Function>
 ): Function => {
-  return function (
-    target: { deleteEndPoints: Array<EndPointDescriptor> | undefined },
-    functionName: string
-  ) {
+  return function (target: ControllerDescriptor, functionName: string) {
     addEnpointToController({
       functionName,
       methode: "delete",
@@ -156,9 +160,13 @@ export const Delete = (
   };
 };
 
-export const Autowired = (target: any, key: string) => {
+export const Autowired = (
+  // autoImport service
+  target: { services?: Array<Service> } | any,
+  key: string
+) => {
   let module = require(`../services/impl/${key}Impl`);
-  if (!!target.services) {
+  if (target.services) {
     target.services = [...target.services, { key, module }];
   } else {
     target.services = [{ key, module }];

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { AuthMiddleware } from "../middlewares/AuthMiddlewares";
 
 type Methodes = "get" | "post" | "put" | "delete";
 
@@ -8,15 +9,15 @@ type Routes = { [key: string]: EndPointDescriptor };
 
 interface EndPointDescriptor {
   target: ControllerDescriptor;
-  url: string;
-  methode: Methodes;
+  url: string | null;
+  methode: Methodes | null;
   functionName: string;
   middlewares?: Array<Function>;
 }
 
 interface ControllerDescriptor {
-  routes: Routes;
-  services: Array<Service>;
+  routes?: Routes;
+  services?: Array<Service>;
   [key: string]: any;
 }
 
@@ -24,15 +25,15 @@ export const router = Router();
 
 const generateRoute = (
   baseUrl: string,
-  route: EndPointDescriptor,
+  route: EndPointDescriptor | undefined,
   constructor: any
 ) => {
-  let fullUrl = `${baseUrl}${route.url}`;
+  let fullUrl = `${baseUrl}${route!.url}`;
   let allMiddlewares = [
-    ...(route.middlewares || []),
-    constructor.prototype[`${route.functionName}`].bind(constructor.prototype),
+    ...(route!.middlewares || []),
+    constructor.prototype[`${route!.functionName}`].bind(constructor.prototype),
   ];
-  switch (route.methode) {
+  switch (route!.methode) {
     case "get":
       router.get(fullUrl, allMiddlewares);
       break;
@@ -102,7 +103,8 @@ export const Controller = (baseUrl: string): Function => {
     if (!!constructor.prototype.routes) {
       let keys = Object.keys(constructor.prototype.routes);
       keys.forEach((key) => {
-        let route = constructor.prototype.routes[key];
+        let route =
+          constructor.prototype.routes && constructor.prototype.routes[key];
         generateRoute(baseUrl, route, constructor);
       });
     }
@@ -161,14 +163,29 @@ export const Delete = (
 };
 
 export const Autowired = (
-  // autoImport service
   target: { services?: Array<Service> } | any,
   key: string
 ) => {
-  let module = require(`../services/impl/${key}Impl`);
+  let module: NodeRequire = require(`../services/impl/${key}Impl`);
   if (target.services) {
     target.services = [...target.services, { key, module }];
   } else {
     target.services = [{ key, module }];
   }
+};
+
+export const Authenticated = (data?: { roles: Array<string> }) => {
+  return function (target: ControllerDescriptor, functionName: string) {
+    if (!(!!target.routes && target.routes[functionName])) {
+      target.routes = {
+        [`${functionName}`]: {
+          url: null,
+          target,
+          methode: null,
+          functionName,
+          middlewares: [AuthMiddleware(data)],
+        },
+      };
+    }
+  };
 };

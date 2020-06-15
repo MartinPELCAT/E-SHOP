@@ -1,12 +1,6 @@
-import {
-  Controller,
-  Get,
-  Delete,
-  Post,
-  Put,
-} from "../decorators/RouteDecorator";
+import { Controller, Get, Delete, Post, Put } from "../decorators/Framework";
 import { Response, Request } from "express";
-import { Authenticated } from "../decorators/AuthenticationDecorator";
+import { Authenticated } from "../decorators/Framework";
 @Controller("/test")
 export default class TestController {
   @Get("/get")

@@ -1,16 +1,22 @@
-import { Controller, Get, Delete, Post, Put } from "../decorators/Framework";
+import {
+  Controller,
+  Get,
+  Delete,
+  Post,
+  Put,
+  Authenticated,
+} from "../decorators/Framework";
 import { Response, Request } from "express";
-import { Authenticated } from "../decorators/Framework";
 @Controller("/test")
 export default class TestController {
-  @Get("/get")
-  @Authenticated()
-  public endpoint(_req: Request, res: Response): Response {
+  @Get("/get/:user")
+  public get(_req: Request, res: Response): Response {
     console.log("TC-Endoint");
     return res.send("YO get");
   }
 
   @Post("/post")
+  @Authenticated({ roles: ["postRole"] })
   public post(req: Request, res: Response): Response {
     console.log(req.body);
     return res.send("YO post");

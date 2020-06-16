@@ -65,9 +65,9 @@ const addEnpointToController = ({
       target.routes = {
         ...target.routes,
         [`${functionName}`]: {
-          url,
+          url: url || existingRoute.url,
           target,
-          methode,
+          methode: methode || existingRoute.methode,
           functionName,
           middlewares: [
             ...(existingRoute.middlewares || []),
@@ -176,7 +176,20 @@ export const Autowired = (
 
 export const Authenticated = (data?: { roles: Array<string> }) => {
   return function (target: ControllerDescriptor, functionName: string) {
-    if (!(!!target.routes && target.routes[functionName])) {
+    if (!!target.routes && target.routes[functionName]) {
+      //TODO : add AuthMiddleware to existing route appends if @Authenticated is before @Get
+    } else if (!!target.routes) {
+      target.routes = {
+        ...target.routes,
+        [`${functionName}`]: {
+          url: null,
+          target,
+          methode: null,
+          functionName,
+          middlewares: [AuthMiddleware(data)],
+        },
+      };
+    } else {
       target.routes = {
         [`${functionName}`]: {
           url: null,

@@ -5,6 +5,7 @@ import { join } from "path";
 import { connectDatabase } from "./config/database";
 import { router } from "./decorators/Framework";
 import { readdirSync } from "fs";
+import { useUserParamResolver } from "./middlewares/ParamResolver";
 
 export default class App {
   private app: Application;
@@ -13,6 +14,7 @@ export default class App {
   constructor(appInit: { port: number; middleWares: any }) {
     this.app = express();
     this.port = appInit.port;
+    this.addApplicationParamResolver();
     this.middlewares(appInit.middleWares);
     this.loadControllers();
     // this.app.use(
@@ -26,6 +28,10 @@ export default class App {
     middleWares.forEach((middleWare) => {
       this.app.use(middleWare);
     });
+  }
+
+  private addApplicationParamResolver() {
+    useUserParamResolver();
   }
 
   private loadControllers() {

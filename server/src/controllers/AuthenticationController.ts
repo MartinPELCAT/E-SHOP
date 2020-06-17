@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { IUser } from "../models/User";
-import { isValidBody, setSessionCookie, clearSessionCookie } from "../utils";
+import { setSessionCookie, clearSessionCookie } from "../utils/CookieUtils";
+import { isValidBody } from "../utils/RequestParameters";
 import { Controller, Post, Get, Autowired } from "../decorators/Framework";
 import { AuthenticationService } from "services/AuthenticationService";
 import { UserService } from "services/UserService";

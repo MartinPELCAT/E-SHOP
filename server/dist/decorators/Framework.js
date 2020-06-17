@@ -1,70 +1,44 @@
-import { Router } from "express";
-import { AuthMiddleware } from "../middlewares/AuthMiddlewares";
-import { red } from "chalk";
-
-type Methodes = "get" | "post" | "put" | "delete";
-
-type Service = { key: string; module: NodeRequire };
-
-type Routes = { [key: string]: EndPointDescriptor };
-
-interface EndPointDescriptor {
-  target: ControllerDescriptor;
-  url: string | null;
-  methode: Methodes | null;
-  functionName: string;
-  middlewares?: Array<Function>;
-}
-
-interface ControllerDescriptor {
-  routes?: Routes;
-  services?: Array<Service>;
-  [key: string]: any;
-}
-
-export const router = Router();
-
-const generateRoute = (
-  baseUrl: string,
-  route: EndPointDescriptor | undefined,
-  constructor: any
-) => {
-  let fullUrl = `${baseUrl}${route!.url}`;
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const AuthMiddlewares_1 = require("../middlewares/AuthMiddlewares");
+const chalk_1 = require("chalk");
+exports.router = express_1.Router();
+const generateRoute = (baseUrl, route, constructor) => {
+  let fullUrl = `${baseUrl}${route.url}`;
   let allMiddlewares = [
-    ...(route!.middlewares || []),
-    constructor.prototype[`${route!.functionName}`].bind(constructor.prototype),
+    ...(route.middlewares || []),
+    constructor.prototype[`${route.functionName}`].bind(constructor.prototype),
   ];
-  switch (route!.methode) {
+  switch (route.methode) {
     case "get":
-      router.get(fullUrl, allMiddlewares);
+      exports.router.get(fullUrl, allMiddlewares);
       break;
     case "post":
-      router.post(fullUrl, allMiddlewares);
+      exports.router.post(fullUrl, allMiddlewares);
       break;
     case "delete":
-      router.delete(fullUrl, allMiddlewares);
+      exports.router.delete(fullUrl, allMiddlewares);
       break;
     case "put":
-      router.put(fullUrl, allMiddlewares);
+      exports.router.put(fullUrl, allMiddlewares);
       break;
     default:
-      router.all(fullUrl, allMiddlewares);
+      exports.router.all(fullUrl, allMiddlewares);
       break;
   }
 };
-
 const addEnpointToController = ({
   functionName,
   methode,
   url,
   target,
   middlewares,
-}: EndPointDescriptor): void => {
+}) => {
   if (!!target.routes) {
     let existingRoute = target.routes[functionName];
     if (!!existingRoute) {
-      target.routes = {
-        ...target.routes,
+      target.routes = Object.assign(Object.assign({}, target.routes), {
         [`${functionName}`]: {
           url: url || existingRoute.url,
           target,
@@ -75,10 +49,9 @@ const addEnpointToController = ({
             ...(middlewares || []),
           ],
         },
-      };
+      });
     } else {
-      target.routes = {
-        ...target.routes,
+      target.routes = Object.assign(Object.assign({}, target.routes), {
         [`${functionName}`]: {
           url,
           methode,
@@ -86,7 +59,7 @@ const addEnpointToController = ({
           functionName,
           middlewares,
         },
-      };
+      });
     }
   } else {
     target.routes = {
@@ -94,11 +67,10 @@ const addEnpointToController = ({
     };
   }
 };
-
-export const Controller = (baseUrl: string): Function => {
-  return function (constructor: { prototype: ControllerDescriptor }) {
+exports.Controller = (baseUrl) => {
+  return function (constructor) {
     constructor.prototype.services &&
-      constructor.prototype.services.forEach((service: any) => {
+      constructor.prototype.services.forEach((service) => {
         constructor.prototype[service.key] = service.module.default;
       });
     if (!!constructor.prototype.routes) {
@@ -111,9 +83,8 @@ export const Controller = (baseUrl: string): Function => {
     }
   };
 };
-
-export const Get = (url: string, middlewares?: Array<Function>): Function => {
-  return function (target: ControllerDescriptor, functionName: string) {
+exports.Get = (url, middlewares) => {
+  return function (target, functionName) {
     addEnpointToController({
       functionName,
       methode: "get",
@@ -123,9 +94,8 @@ export const Get = (url: string, middlewares?: Array<Function>): Function => {
     });
   };
 };
-
-export const Post = (url: string, middlewares?: Array<Function>): Function => {
-  return function (target: ControllerDescriptor, functionName: string) {
+exports.Post = (url, middlewares) => {
+  return function (target, functionName) {
     addEnpointToController({
       functionName,
       methode: "post",
@@ -135,9 +105,8 @@ export const Post = (url: string, middlewares?: Array<Function>): Function => {
     });
   };
 };
-
-export const Put = (url: string, middlewares?: Array<Function>): Function => {
-  return function (target: ControllerDescriptor, functionName: string) {
+exports.Put = (url, middlewares) => {
+  return function (target, functionName) {
     addEnpointToController({
       functionName,
       methode: "put",
@@ -147,12 +116,8 @@ export const Put = (url: string, middlewares?: Array<Function>): Function => {
     });
   };
 };
-
-export const Delete = (
-  url: string,
-  middlewares?: Array<Function>
-): Function => {
-  return function (target: ControllerDescriptor, functionName: string) {
+exports.Delete = (url, middlewares) => {
+  return function (target, functionName) {
     addEnpointToController({
       functionName,
       methode: "delete",
@@ -162,42 +127,36 @@ export const Delete = (
     });
   };
 };
-
 /**
  * @description auto import service to a given property name
  * propertyName must fit fileName
  */
-export const Autowired = (
-  target: { services?: Array<Service> } | any,
-  key: string
-) => {
+exports.Autowired = (target, key) => {
   try {
-    let module: NodeRequire = require(`../services/impl/${key}Impl`);
+    let module = require(`../services/impl/${key}Impl`);
     if (target.services) {
       target.services = [...target.services, { key, module }];
     } else {
       target.services = [{ key, module }];
     }
   } catch (error) {
-    console.error(red(error));
+    console.error(chalk_1.red(error));
   }
 };
-
-export const Authenticated = (data?: { roles: Array<string> }) => {
-  return function (target: ControllerDescriptor, functionName: string) {
+exports.Authenticated = (data) => {
+  return function (target, functionName) {
     if (!!target.routes && target.routes[functionName]) {
       //TODO : add AuthMiddleware to existing route appends if @Authenticated is before @Get
     } else if (!!target.routes) {
-      target.routes = {
-        ...target.routes,
+      target.routes = Object.assign(Object.assign({}, target.routes), {
         [`${functionName}`]: {
           url: null,
           target,
           methode: null,
           functionName,
-          middlewares: [AuthMiddleware(data)],
+          middlewares: [AuthMiddlewares_1.AuthMiddleware(data)],
         },
-      };
+      });
     } else {
       target.routes = {
         [`${functionName}`]: {
@@ -205,7 +164,7 @@ export const Authenticated = (data?: { roles: Array<string> }) => {
           target,
           methode: null,
           functionName,
-          middlewares: [AuthMiddleware(data)],
+          middlewares: [AuthMiddlewares_1.AuthMiddleware(data)],
         },
       };
     }

@@ -1,15 +1,10 @@
-import { Request, Response, NextFunction } from "express";
-import { router } from "../decorators/Framework";
-import { User } from "../models/User";
-
-export const useUserParamResolver = () => {
-  router.param("user", function (
-    _req: Request,
-    res: Response,
-    next: NextFunction,
-    id: string
-  ) {
-    User.findOne({ _id: id })
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Framework_1 = require("../decorators/Framework");
+const User_1 = require("../models/User");
+exports.useUserParamResolver = () => {
+  Framework_1.router.param("user", function (_req, res, next, id) {
+    User_1.User.findOne({ _id: id })
       .then((user) => {
         if (user) {
           res.locals.userParam = user;

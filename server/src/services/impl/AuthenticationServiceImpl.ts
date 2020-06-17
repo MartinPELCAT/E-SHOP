@@ -1,8 +1,9 @@
 import { IUser } from "../../models/User";
-import { UserDAO } from "../../dao";
+import UserDAO from "../../dao/UserDAO";
 import { FilterQuery } from "mongoose";
-import { comparePassword } from "../../utils";
 import { AuthenticationService } from "services/AuthenticationService";
+import { ErrorResponse } from "../../errors/ErrorResponse";
+import { compare } from "bcrypt";
 
 class AuthenticationServiceImpl implements AuthenticationService {
   private userDAO = UserDAO;
@@ -11,31 +12,18 @@ class AuthenticationServiceImpl implements AuthenticationService {
     return this.userDAO.generateNewToken(user);
   }
 
-  public findUserOrFail(
-    condition: FilterQuery<IUser>,
-    password: string
-  ): Promise<IUser> {
-    return new Promise<IUser>((resolve, reject) => {
-      this.userDAO
-        .findOne(condition)
-        .then((user) => {
-          if (user && user.password) {
-            comparePassword(password, user.password)
-              .then(() => {
-                user.password = undefined; // dont send back password in response
-                resolve(user);
-              })
-              .catch(() => {
-                reject(new Error("User not found"));
-              });
-          } else {
-            reject(new Error("User not found"));
-          }
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+  public async findUserOrFail(condition: FilterQuery<IUser>, password: string) {
+    let user = await this.userDAO.findOne(condition);
+    if (user && user.password) {
+      let passwordMatch = await compare(password, user.password);
+      if (passwordMatch) {
+        return user;
+      } else {
+        throw new ErrorResponse("Password dont match");
+      }
+    } else {
+      throw new ErrorResponse("User not found");
+    }
   }
 }
 

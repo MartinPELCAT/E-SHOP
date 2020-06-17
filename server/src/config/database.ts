@@ -1,10 +1,12 @@
-import mongoose = require("mongoose");
-import * as chalk from 'chalk';
-import Bluebird = require("bluebird");
-mongoose.Promise = Bluebird;
+import { connect } from "mongoose";
+import { green, red } from "chalk";
 
 export const connectDatabase = () => {
-    mongoose.connect('mongodb://localhost:27017/e-shop', { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true })
-        .then(() => console.log(chalk.green('Connexion à MongoDB réussie !')))
-        .catch((e) => console.log(chalk.red('Connexion à MongoDB échouée !', e)));
-}
+  connect("mongodb://localhost:27017/e-shop", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+  })
+    .then(() => console.log(green("Connexion à MongoDB réussie !")))
+    .catch(() => console.log(red("Connexion à MongoDB échouée !")));
+};

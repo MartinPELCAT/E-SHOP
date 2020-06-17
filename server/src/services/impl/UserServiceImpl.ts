@@ -1,49 +1,29 @@
 import { IUser } from "../../models/User";
-import { UserDAO } from "../../dao";
+import UserDAO from "../../dao/UserDAO";
 import { FilterQuery } from "mongoose";
-import { Promise } from "bluebird";
-import { hashPassword } from "../../utils";
+import { hashPassword } from "../../utils/BcryptUtils";
 import { UserService } from "services/UserService";
+import { ErrorResponse } from "../../errors/ErrorResponse";
 
 class UserServiceImpl implements UserService {
   private userDao = UserDAO;
 
-  public createUser(user: any): Promise<IUser> {
-    return new Promise((resolve, reject) => {
-      hashPassword(user.password)
-        .then((hashedPassword) => {
-          user.password = hashedPassword;
-          this.userDao
-            .insertUser(user)
-            .then((insertedUser) => {
-              resolve(insertedUser);
-            })
-            .catch((err) => {
-              reject(err);
-            });
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+  public async createUser(user: any) {
+    console.log("create user");
+    const hashedPassword: string = await hashPassword(user.password);
+    user.password = hashedPassword;
+    const user_1 = user;
+    return this.userDao.insertUser(user_1);
   }
 
-  public findOneOrFail(condition: FilterQuery<IUser>): Promise<IUser> {
-    return new Promise<IUser>((resolve, reject) => {
-      this.userDao
-        .findOne(condition)
-        .then((user) => {
-          if (user) {
-            user.password = undefined;
-            resolve(user);
-          } else {
-            reject(new Error("User not found"));
-          }
-        })
-        .catch((err: Error) => {
-          reject(err);
-        });
-    });
+  public async findOneOrFail(condition: FilterQuery<IUser>) {
+    const user = await this.userDao.findOne(condition);
+    if (user) {
+      user.password = undefined;
+      return user;
+    } else {
+      throw new ErrorResponse("User not found");
+    }
   }
 }
 

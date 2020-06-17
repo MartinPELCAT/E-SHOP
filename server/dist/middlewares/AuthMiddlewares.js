@@ -1,13 +1,13 @@
-import { Request, Response, NextFunction } from "express";
-import { User } from "../models/User";
-
-export const AuthMiddleware = (_data?: { roles: Array<string> }) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const User_1 = require("../models/User");
+exports.AuthMiddleware = (_data) => {
+  return (req, res, next) => {
     let token = req.signedCookies._UID;
     if (!token) {
       return res.status(403).json({ message: "You are not logged" });
     } else {
-      User.findOne({ token })
+      User_1.User.findOne({ token })
         .then((user) => {
           if (user) {
             res.locals.user = user;

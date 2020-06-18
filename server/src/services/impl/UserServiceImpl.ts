@@ -9,7 +9,6 @@ class UserServiceImpl implements UserService {
   private userDao = UserDAO;
 
   public async createUser(user: any) {
-    console.log("create user");
     const hashedPassword: string = await hashPassword(user.password);
     user.password = hashedPassword;
     const user_1 = user;

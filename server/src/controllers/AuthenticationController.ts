@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
-import { IUser } from "../models/User";
-import { setSessionCookie, clearSessionCookie } from "../utils/CookieUtils";
-import { isValidBody } from "../utils/RequestParameters";
+import { clearSessionCookie, setSessionCookie } from "../utils/CookieUtils";
 import { Controller, Post, Get, Autowired } from "../decorators/Framework";
-import { AuthenticationService } from "services/AuthenticationService";
-import { UserService } from "services/UserService";
+import { AuthenticationService } from "../services/AuthenticationService";
+import { UserService } from "../services/UserService";
+import { registerForm, loginForm } from "../formSchemas/authenticationForms";
 
 @Controller("/auth")
 export default class AuthenticationController {
@@ -16,40 +15,44 @@ export default class AuthenticationController {
 
   @Post("/login", [clearSessionCookie])
   public login(req: Request, res: Response) {
-    let { email, password, rememberMe } = req.body;
-    this.authenticationService
-      .findUserOrFail({ email }, password)
-      .then((user: IUser) => {
+    loginForm
+      .validateAsync(req.body)
+      .then(({ email, password, rememberMe }) => {
+        return Promise.all([
+          this.authenticationService.findUserOrFail({ email }, password),
+          rememberMe, // boolean value
+        ]);
+      })
+      .then(([user, rememberMe]) => {
         setSessionCookie(res, user, rememberMe);
         return res.send({ user, message: "You are now logged", sucess: true });
       })
-      .catch((err: Error) => {
+      .catch((err) => {
         return res.status(401).json({ message: err.message });
       });
   }
 
   @Post("/register")
   public register(req: Request, res: Response) {
-    let { email, password, lastname, firstname, username }: IUser = req.body;
-    let userParameters = { email, password, lastname, firstname, username };
-    if (!isValidBody(req.body, userParameters)) {
-      // TODO: use yup or hapi joi instead
-      return res.status(400).json({ message: "Unkonwn parameters" });
-    }
-    this.userService
-      .createUser({ password, firstname, lastname, email, username })
-      .then((createdUser: any) => {
-        this.authenticationService
-          .generateNewToken(createdUser)
-          .then((user: any) => {
-            return res.status(201).json(user);
-          })
-          .catch(() => {
-            return res.status(500).json({ message: "Internal Error" });
-          });
+    registerForm
+      .validateAsync(req.body, { cache: true })
+      .then(({ lastname, firstname, password, email, username }) =>
+        this.userService.createUser({
+          lastname,
+          firstname,
+          password,
+          email,
+          username,
+        })
+      )
+      .then((createdUser) => {
+        return this.authenticationService.generateNewToken(createdUser);
       })
-      .catch(() => {
-        return res.status(500).json({ message: "Internal Error" });
+      .then((user) => {
+        return res.status(201).send(user);
+      })
+      .catch((error) => {
+        return res.status(500).send({ message: "Internal Error", error });
       });
   }
 

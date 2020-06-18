@@ -5,11 +5,12 @@
     "strict": true,
     "target": "es6",
     "module": "commonjs",
-    "outDir": "./dist",
+    "outDir": "./build",
     "baseUrl": "./src",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "noImplicitAny": true,
+    "removeComments": true,
     "noUnusedParameters": true,
     "noUnusedLocals": true,
     "allowUnreachableCode": false

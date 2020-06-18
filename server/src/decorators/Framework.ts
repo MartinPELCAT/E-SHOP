@@ -182,6 +182,10 @@ export const Autowired = (
     console.error(red(error));
   }
 };
+/**
+ * @description authencicated decorator must be just above the route
+ * @param data roles that user must have to have a granted access
+ */
 
 export const Authenticated = (data?: { roles: Array<string> }) => {
   return function (target: ControllerDescriptor, functionName: string) {
